@@ -12,5 +12,7 @@ public class TeamService {
     @Autowired
     TeamRepository teamRepository;
 
-
+    public void addTeam(TeamEntity teamEntity) {
+        teamRepository.save(teamEntity);
+    }
 }

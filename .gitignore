@@ -32,3 +32,5 @@ out/
 .vscode/
 
 python/env
+env/
+spring-shell.log
