@@ -45,7 +45,7 @@ public class DraftService {
      *
      * @param leagueEntity
      */
-    private boolean cleanDraft(LeagueEntity leagueEntity) {
+    public boolean cleanDraft(LeagueEntity leagueEntity) {
         try {
             List<DraftingRoomEntity> draftingRoomEntities = draftingRoomRepository.findAllByLeague(leagueEntity.getId());
             draftingRoomRepository.deleteAll(draftingRoomEntities);
