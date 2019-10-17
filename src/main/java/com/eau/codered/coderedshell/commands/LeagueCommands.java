@@ -16,13 +16,13 @@ import java.util.Scanner;
 @ShellComponent
 public class LeagueCommands {
     @Autowired
-    LeagueService leagueService;
+    private LeagueService leagueService;
 
     @Autowired
-    TeamService teamService;
+    private TeamService teamService;
 
     @Autowired
-    DraftService draftService;
+    private DraftService draftService;
 
     @ShellMethod(value = "Create a league", key = "create-league")
     public String createLeague(@ShellOption(value = {"-n", "--name"}) String name,

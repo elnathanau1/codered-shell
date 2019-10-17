@@ -6,12 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 
 @ShellComponent
-public class UtilCommands {
+class UtilCommands {
 
     @Autowired
     private Terminal terminal;
 
-    public void clear() {
+    void clear() {
         terminal.puts(InfoCmp.Capability.clear_screen);
     }
 
