@@ -32,6 +32,8 @@ public class DraftCommands {
 
         draftService.setupDraft(league);
 
+
+
         return "This is my clear";
     }
 }

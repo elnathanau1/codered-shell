@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface DraftingRoomRepository extends CrudRepository<DraftingRoomEntity, Integer> {
     List<DraftingRoomEntity> findAllByLeague(int league);
+    List<DraftingRoomEntity> findTop20ByLeagueOrderByHashtagRank(int league);
 }
