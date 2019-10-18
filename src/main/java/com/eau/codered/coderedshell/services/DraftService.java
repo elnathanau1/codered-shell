@@ -1,6 +1,6 @@
 package com.eau.codered.coderedshell.services;
 
-import com.eau.codered.coderedshell.config.DraftStateConfig;
+import com.eau.codered.coderedshell.config.DraftState;
 import com.eau.codered.coderedshell.entities.*;
 import com.eau.codered.coderedshell.repositories.DraftedPlayerRepository;
 import com.eau.codered.coderedshell.repositories.DraftingRoomRepository;
@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,7 +29,7 @@ public class DraftService {
     @Autowired
     private DraftedPlayerRepository draftedPlayerRepository;
     @Autowired
-    DraftStateConfig draftState;
+    private DraftState draftState;
 
     @Autowired
     private LeagueService leagueService;
@@ -100,7 +99,7 @@ public class DraftService {
         }
     }
 
-    public List<DraftingRoomEntity> getDraftBoard() {
+    public List<DraftingRoomEntity> getDraftBoard(String category) {
         LeagueEntity leagueEntity = draftState.getLeagueEntity();
         Map<String, Double> weights = draftState.getWeights();
 
@@ -111,10 +110,7 @@ public class DraftService {
                 .map(x -> DraftUtil.setTotal(x, weights))
                 .collect(Collectors.toList());
 
-        draftingRoomEntities = draftingRoomEntities
-                .stream()
-                .sorted(Comparator.comparing(DraftingRoomEntity::getTotal).reversed())
-                .collect(Collectors.toList());
+        draftingRoomEntities = DraftUtil.sortList(draftingRoomEntities, category);
 
         return draftingRoomEntities;
     }

@@ -1,10 +1,11 @@
 package com.eau.codered.coderedshell.commands;
 
-import com.eau.codered.coderedshell.config.DraftStateConfig;
+import com.eau.codered.coderedshell.config.DraftState;
 import com.eau.codered.coderedshell.entities.DraftingRoomEntity;
 import com.eau.codered.coderedshell.entities.LeagueEntity;
 import com.eau.codered.coderedshell.services.DraftService;
 import com.eau.codered.coderedshell.services.LeagueService;
+import com.eau.codered.coderedshell.util.DraftUtil;
 import com.eau.codered.coderedshell.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
@@ -33,8 +34,11 @@ public class DraftCommands {
     private UtilCommands utilCommands;
 
     @Autowired
-    private DraftStateConfig draftState;
+    private DraftState draftState;
 
+    private static final String[] DRAFT_HEADERS = new String[]{
+            "htag_rk", "espn_rk", "espn_adp", "name", "pos", "gp ", "fg_pct", "ft_pct", "3pm  ", "pts  ", "reb  ", "ast  ", "stl  ", "blk  ", "to   ", "total"
+    };
 
     @ShellMethod(value = "Start a draft for a league", key = "start-draft")
     public String startDraft(@ShellOption(value = {"-l", "--league"}) String league) {
@@ -55,6 +59,7 @@ public class DraftCommands {
             draftService.setupDraft();
 
             draftState.setDrafting(true);
+            draftState.setBoardLength(2 * leagueEntity.getNumTeams());
 
             return "Draft set up!";
         }
@@ -62,17 +67,17 @@ public class DraftCommands {
     }
 
     @ShellMethod(value = "Display the draft board", key = {"draft-board", "db"})
-    public String draftBoard(@ShellOption(value = {"-s", "--sort"}, defaultValue = "htag_rk") String sort) {
+    public String draftBoard() {
         List<String> possibleSort = new ArrayList<>();
         if (draftState.isDrafting()) {
             // display table
             List<String[]> model = new ArrayList<>();
-            model.add(new String[]{
-                    "htag_rk", "espn_rk", "espn_adp", "name", "pos", "gp ", "fg_pct", "ft_pct", "3pm  ", "pts  ", "reb  ", "ast  ", "stl  ", "blk  ", "to   ", "total"
-            });
+            model.add(DRAFT_HEADERS);
 
-            List<DraftingRoomEntity> draftingRoomEntities = draftService.getDraftBoard();
-            for (DraftingRoomEntity draftingRoomEntity : draftingRoomEntities) {
+            List<DraftingRoomEntity> draftingRoomEntities = draftService.getDraftBoard(draftState.getSortCategory());
+            List<DraftingRoomEntity> displayedRoomEntities = draftingRoomEntities.subList(0, draftState.getBoardLength());
+
+            for (DraftingRoomEntity draftingRoomEntity : displayedRoomEntities) {
                 model.add(new String[]{
                         String.valueOf(draftingRoomEntity.getHashtagRank()),
                         String.valueOf(draftingRoomEntity.getEspnRank()),
@@ -115,9 +120,12 @@ public class DraftCommands {
         return "Not currently drafting, use start-draft to begin";
     }
 
-    @ShellMethod(value = "Set the weights for total calculations", key = {"set-weights", "sw"})
-    public String setWeights(@ShellOption(value = {"-c", "--cat", "--category"}) String category,
-                             @ShellOption(value = {"-v", "--value",}) Double value) {
+    @ShellMethod(value = "Set the weights for total calculations", key = {"weights"})
+    public String setWeights(@ShellOption(value = {"-c", "--cat", "--category"}, defaultValue = "none") String category,
+                             @ShellOption(value = {"-v", "--value"}, defaultValue = "1.0") Double value) {
+        if (category.equals("none")) {
+            return draftState.getWeights().toString();
+        }
         Map<String, Double> weights = draftState.getWeights();
         weights.put(category, value);
         draftState.setWeights(weights);
@@ -126,12 +134,21 @@ public class DraftCommands {
     }
 
     @ShellMethod(value = "Set the size of the draft board", key = {"set-draft-size", "sds"})
-    public String setWeights(@ShellOption(value = {"-v", "--value",}) Integer value) {
+    public String setDraftSize(@ShellOption(value = {"-v", "--value"}) Integer value) {
         if (value > 0) {
             draftState.setBoardLength(value);
             return "Draft board size is now set to " + value;
         }
 
         return "Choose a size greater than 0";
+    }
+
+    @ShellMethod(value = "Set the sort category", key = {"sort"})
+    public String setSort(@ShellOption(value = {"-c", "--cat", "--category"}) String category) {
+        if (DraftUtil.getValidCategories().contains(category.toLowerCase())) {
+            draftState.setSortCategory(category);
+            return "Now sorting by " + category + "\n" + draftBoard();
+        }
+        return "Available categories: " + DraftUtil.getValidCategories().toString();
     }
 }
