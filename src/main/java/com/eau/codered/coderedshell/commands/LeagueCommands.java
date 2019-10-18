@@ -16,10 +16,13 @@ import java.util.Scanner;
 @ShellComponent
 public class LeagueCommands {
     @Autowired
-    LeagueService leagueService;
+    private LeagueService leagueService;
 
     @Autowired
-    TeamService teamService;
+    private TeamService teamService;
+
+    @Autowired
+    private DraftService draftService;
 
     @Autowired
     DraftService draftService;

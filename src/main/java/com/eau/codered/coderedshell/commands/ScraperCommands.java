@@ -11,7 +11,7 @@ import java.util.Map;
 @ShellComponent
 public class ScraperCommands {
     @Autowired
-    PropertiesService propertiesService;
+    private PropertiesService propertiesService;
 
     @ShellMethod(value = "Run scrapers", key = "run-scrapers")
     public String runScrapers() {

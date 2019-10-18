@@ -65,8 +65,8 @@ public class DraftService {
             logger.error("Could not create draft board for league={}, exception e={}", leagueEntity, e.getMessage());
         }
     }
-    
-    public void cleanDraft(LeagueEntity leagueEntity) {
+
+    public boolean cleanDraft(LeagueEntity leagueEntity) {
         try {
             List<DraftingRoomEntity> draftingRoomEntities = draftingRoomRepository.findAllByLeague(leagueEntity.getId());
             draftingRoomRepository.deleteAll(draftingRoomEntities);
@@ -75,8 +75,18 @@ public class DraftService {
             draftedPlayerRepository.deleteAll(draftedPlayerEntities);
 
             logger.info("Cleaned database of old draft data");
+
+            return true;
+          
         } catch (Exception e) {
+
             logger.error("Encountered exception={}", e.getMessage());
+            return false;
         }
+    }
+
+    public List<DraftingRoomEntity> getDraftBoard(String leagueName) {
+        LeagueEntity leagueEntity = leagueService.getLeagueByName(leagueName);
+        return draftingRoomRepository.findTop20ByLeagueOrderByHashtagRank(leagueEntity.getId());
     }
 }
