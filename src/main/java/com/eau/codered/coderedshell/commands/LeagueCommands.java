@@ -46,7 +46,8 @@ public class LeagueCommands {
         }
 
         draftState.setLeagueEntity(leagueEntity);
-        
+        draftState.setBoardLength(numTeams * 2);
+
         return "Created " + numTeams + "-team league " + name;
     }
 
