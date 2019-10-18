@@ -1,6 +1,6 @@
 package com.eau.codered.coderedshell.commands;
 
-import com.eau.codered.coderedshell.config.DraftStateConfig;
+import com.eau.codered.coderedshell.config.DraftState;
 import com.eau.codered.coderedshell.entities.DraftingRoomEntity;
 import com.eau.codered.coderedshell.entities.LeagueEntity;
 import com.eau.codered.coderedshell.services.DraftService;
@@ -33,7 +33,7 @@ public class DraftCommands {
     private UtilCommands utilCommands;
 
     @Autowired
-    private DraftStateConfig draftState;
+    private DraftState draftState;
 
 
     @ShellMethod(value = "Start a draft for a league", key = "start-draft")

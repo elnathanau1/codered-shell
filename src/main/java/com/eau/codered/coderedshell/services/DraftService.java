@@ -1,6 +1,6 @@
 package com.eau.codered.coderedshell.services;
 
-import com.eau.codered.coderedshell.config.DraftStateConfig;
+import com.eau.codered.coderedshell.config.DraftState;
 import com.eau.codered.coderedshell.entities.*;
 import com.eau.codered.coderedshell.repositories.DraftedPlayerRepository;
 import com.eau.codered.coderedshell.repositories.DraftingRoomRepository;
@@ -30,7 +30,7 @@ public class DraftService {
     @Autowired
     private DraftedPlayerRepository draftedPlayerRepository;
     @Autowired
-    DraftStateConfig draftState;
+    DraftState draftState;
 
     @Autowired
     private LeagueService leagueService;

@@ -9,7 +9,7 @@ import java.util.Map;
 
 @Data
 @Service
-public class DraftStateConfig {
+public class DraftState {
     // state
     private boolean drafting = false;
     private LeagueEntity leagueEntity = null;

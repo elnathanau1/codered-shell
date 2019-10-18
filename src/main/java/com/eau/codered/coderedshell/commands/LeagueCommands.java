@@ -1,5 +1,6 @@
 package com.eau.codered.coderedshell.commands;
 
+import com.eau.codered.coderedshell.config.DraftState;
 import com.eau.codered.coderedshell.entities.LeagueEntity;
 import com.eau.codered.coderedshell.entities.TeamEntity;
 import com.eau.codered.coderedshell.services.DraftService;
@@ -24,6 +25,9 @@ public class LeagueCommands {
     @Autowired
     private DraftService draftService;
 
+    @Autowired
+    private DraftState draftState;
+
     @ShellMethod(value = "Create a league", key = "create-league")
     public String createLeague(@ShellOption(value = {"-n", "--name"}) String name,
                                @ShellOption(defaultValue = "12", value = {"-t", "--teams"}) int numTeams) {
@@ -40,6 +44,9 @@ public class LeagueCommands {
                     .build();
             teamService.addTeam(teamEntity);
         }
+
+        draftState.setLeagueEntity(leagueEntity);
+        
         return "Created " + numTeams + "-team league " + name;
     }
 
