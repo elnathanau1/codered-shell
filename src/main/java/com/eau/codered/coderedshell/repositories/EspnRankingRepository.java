@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EspnRankingRepository extends CrudRepository<EspnRankingEntity, Integer> {
-    EspnRankingEntity findByName(String name);
+    EspnRankingEntity findByNameAllIgnoreCase(String name);
 }

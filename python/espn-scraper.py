@@ -34,7 +34,7 @@ def pull_data():
     player_list = []
     for i in range(0, len(json['players'])):
         try:
-            name = json['players'][i]['player']["fullName"]
+            name = json['players'][i]['player']["fullName"].replace(".", "")
             rank = json['players'][i]['player']["draftRanksByRankType"]["STANDARD"]["rank"]
             adp = json['players'][i]['player']["ownership"]["averageDraftPosition"]
 
