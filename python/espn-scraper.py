@@ -13,12 +13,12 @@ def connect_to_db(host, port, database, user, password):
         conn = psycopg2.connect(host=host, port=port, database=database, user=user, password=password)
         cur = conn.cursor()
 
-        print('PostgreSQL database version:')
-        cur.execute('SELECT version()')
-
-        # display the PostgreSQL database server version
-        db_version = cur.fetchone()
-        print(db_version)
+        # print('PostgreSQL database version:')
+        # cur.execute('SELECT version()')
+        #
+        # # display the PostgreSQL database server version
+        # db_version = cur.fetchone()
+        # print(db_version)
 
         # # close the communication with the PostgreSQL
         #  cur.close()

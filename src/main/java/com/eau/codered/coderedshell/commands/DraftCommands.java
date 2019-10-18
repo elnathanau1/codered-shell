@@ -4,6 +4,7 @@ import com.eau.codered.coderedshell.entities.DraftingRoomEntity;
 import com.eau.codered.coderedshell.entities.LeagueEntity;
 import com.eau.codered.coderedshell.services.DraftService;
 import com.eau.codered.coderedshell.services.LeagueService;
+import com.eau.codered.coderedshell.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -62,7 +63,7 @@ public class DraftCommands {
             // display table
             List<String[]> model = new ArrayList<>();
             model.add(new String[]{
-                    "htag_rk", "espn_rk", "espn_adp", "name", "pos", "gp", "fg_pct", "ft_pct", "3pm", "pts", "reb", "ast", "stl", "blk", "to", "total"
+                    "htag_rk", "espn_rk", "espn_adp", "name", "pos", "gp ", "fg_pct", "ft_pct", "3pm  ", "pts  ", "reb  ", "ast  ", "stl  ", "blk  ", "to   ", "total"
             });
 
             List<DraftingRoomEntity> draftingRoomEntities = draftService.getDraftBoard(leagueEntity.getName());
@@ -70,7 +71,7 @@ public class DraftCommands {
                 model.add(new String[]{
                         String.valueOf(draftingRoomEntity.getHashtagRank()),
                         String.valueOf(draftingRoomEntity.getEspnRank()),
-                        String.valueOf(draftingRoomEntity.getEspnAdp()).substring(0, 4),
+                        String.valueOf(draftingRoomEntity.getEspnAdp()),
                         String.valueOf(draftingRoomEntity.getName()),
                         String.valueOf(draftingRoomEntity.getPos()),
                         String.valueOf(draftingRoomEntity.getGp()),
@@ -90,6 +91,12 @@ public class DraftCommands {
 
             String[][] array = new String[model.size()][model.get(0).length];
             for (int i = 0; i < model.size(); i++) {
+                // truncate values to make more readable
+                for (int j = 0; j < model.get(0).length; j++) {
+                    if (j != 3 && j != 4 && i != 0) {
+                        model.get(i)[j] = StringUtil.truncate(model.get(i)[j], 4);
+                    }
+                }
                 array[i] = model.get(i);
             }
             TableModel tableModel = new ArrayTableModel(array);
