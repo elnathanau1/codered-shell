@@ -101,6 +101,5 @@ public class DraftCommands {
             return table;
         }
         return "Not currently drafting, use start-draft to begin";
-
     }
 }

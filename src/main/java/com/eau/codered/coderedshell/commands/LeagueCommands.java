@@ -24,6 +24,9 @@ public class LeagueCommands {
     @Autowired
     private DraftService draftService;
 
+    @Autowired
+    DraftService draftService;
+
     @ShellMethod(value = "Create a league", key = "create-league")
     public String createLeague(@ShellOption(value = {"-n", "--name"}) String name,
                                @ShellOption(defaultValue = "12", value = {"-t", "--teams"}) int numTeams) {

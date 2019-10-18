@@ -75,8 +75,9 @@ public class DraftService {
             draftedPlayerRepository.deleteAll(draftedPlayerEntities);
 
             logger.info("Cleaned database of old draft data");
-            return true;
 
+            return true;
+          
         } catch (Exception e) {
 
             logger.error("Encountered exception={}", e.getMessage());
