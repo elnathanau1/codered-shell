@@ -17,6 +17,6 @@ public class HashtagRankingStatsService {
     }
 
     public HashtagRankingStatsEntity getPlayer(String name) {
-        return hashtagRankingStatsRepository.findByName(name);
+        return hashtagRankingStatsRepository.findByNameAllIgnoreCase(name);
     }
 }

@@ -10,5 +10,5 @@ import java.util.List;
 public interface HashtagRankingStatsRepository extends CrudRepository<HashtagRankingStatsEntity, Integer> {
     List<HashtagRankingStatsEntity> findAll();
 
-    HashtagRankingStatsEntity findByName(String name);
+    HashtagRankingStatsEntity findByNameAllIgnoreCase(String name);
 }

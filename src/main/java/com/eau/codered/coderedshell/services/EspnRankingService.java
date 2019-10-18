@@ -11,6 +11,6 @@ public class EspnRankingService {
     EspnRankingRepository espnRankingRepository;
 
     public EspnRankingEntity findByName(String name) {
-        return espnRankingRepository.findByName(name);
+        return espnRankingRepository.findByNameAllIgnoreCase(name);
     }
 }

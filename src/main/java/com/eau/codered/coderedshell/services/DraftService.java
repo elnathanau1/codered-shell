@@ -1,8 +1,10 @@
 package com.eau.codered.coderedshell.services;
 
+import com.eau.codered.coderedshell.config.DraftStateConfig;
 import com.eau.codered.coderedshell.entities.*;
 import com.eau.codered.coderedshell.repositories.DraftedPlayerRepository;
 import com.eau.codered.coderedshell.repositories.DraftingRoomRepository;
+import com.eau.codered.coderedshell.util.DraftUtil;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class DraftService {
@@ -24,6 +29,8 @@ public class DraftService {
     private DraftingRoomRepository draftingRoomRepository;
     @Autowired
     private DraftedPlayerRepository draftedPlayerRepository;
+    @Autowired
+    DraftStateConfig draftState;
 
     @Autowired
     private LeagueService leagueService;
@@ -33,16 +40,14 @@ public class DraftService {
 
     private static Logger logger = LoggerFactory.getLogger(DraftService.class);
 
-    public void setupDraft(String leagueName) {
-        LeagueEntity leagueEntity = leagueService.getLeagueByName(leagueName);
+    public void setupDraft() {
+        cleanDraft(draftState.getLeagueEntity());
 
-        cleanDraft(leagueEntity);
-
-        createDraftBoard(leagueEntity);
-
+        createDraftBoard();
     }
 
-    private void createDraftBoard(LeagueEntity leagueEntity) {
+    private void createDraftBoard() {
+        LeagueEntity leagueEntity = draftState.getLeagueEntity();
         try {
             List<HashtagRankingZscoreEntity> hashtagRankingZscoreEntities = hashtagRankingZscoreService.getAll();
 
@@ -95,8 +100,22 @@ public class DraftService {
         }
     }
 
-    public List<DraftingRoomEntity> getDraftBoard(String leagueName) {
-        LeagueEntity leagueEntity = leagueService.getLeagueByName(leagueName);
-        return draftingRoomRepository.findTop20ByLeagueOrderByHashtagRank(leagueEntity.getId());
+    public List<DraftingRoomEntity> getDraftBoard() {
+        LeagueEntity leagueEntity = draftState.getLeagueEntity();
+        Map<String, Double> weights = draftState.getWeights();
+
+        List<DraftingRoomEntity> draftingRoomEntities = draftingRoomRepository.findAllByLeague(leagueEntity.getId());
+
+        draftingRoomEntities = draftingRoomEntities
+                .stream()
+                .map(x -> DraftUtil.setTotal(x, weights))
+                .collect(Collectors.toList());
+
+        draftingRoomEntities = draftingRoomEntities
+                .stream()
+                .sorted(Comparator.comparing(DraftingRoomEntity::getTotal).reversed())
+                .collect(Collectors.toList());
+
+        return draftingRoomEntities;
     }
 }
