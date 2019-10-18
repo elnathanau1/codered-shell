@@ -16,8 +16,8 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-@Table(name="hashtag_rankings")
-public class HashtagRankingEntity {
+@Table(name="hashtag_rankings_stats")
+public class HashtagRankingStatsEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private int id;

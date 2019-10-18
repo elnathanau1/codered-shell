@@ -14,12 +14,12 @@ def connect_to_db(host, port, database, user, password):
         conn = psycopg2.connect(host=host, port=port, database=database, user=user, password=password)
         cur = conn.cursor()
 
-        print('PostgreSQL database version:')
-        cur.execute('SELECT version()')
-
-        # display the PostgreSQL database server version
-        db_version = cur.fetchone()
-        print(db_version)
+        # print('PostgreSQL database version:')
+        # cur.execute('SELECT version()')
+        #
+        # # display the PostgreSQL database server version
+        # db_version = cur.fetchone()
+        # print(db_version)
 
         # # close the communication with the PostgreSQL
         #  cur.close()
@@ -58,8 +58,8 @@ def pull_data():
     return player_list
 
 def push_to_db(player_list, conn):
-    insert_sql = """INSERT INTO public.hashtag_rankings (rank, name, pos, team, gp, mpg, fg_percent, ft_percent, threepm, pts, treb, ast, stl, blk, turnovers, total, last_modified) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"""
-    delete_sql = """DELETE FROM public.hashtag_rankings"""
+    insert_sql = """INSERT INTO public.hashtag_rankings_stats (rank, name, pos, team, gp, mpg, fg_percent, ft_percent, threepm, pts, treb, ast, stl, blk, turnovers, total, last_modified) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"""
+    delete_sql = """DELETE FROM public.hashtag_rankings_stats"""
     cur = conn.cursor()
     cur.execute(delete_sql)
     cur.executemany(insert_sql, player_list)

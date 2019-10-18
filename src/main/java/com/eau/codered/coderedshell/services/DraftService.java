@@ -17,7 +17,9 @@ public class DraftService {
     @Autowired
     private EspnRankingService espnRankingService;
     @Autowired
-    private HashtagRankingService hashtagRankingService;
+    private HashtagRankingZscoreService hashtagRankingZscoreService;
+    @Autowired
+    private HashtagRankingStatsService hashtagRankingStatsService;
     @Autowired
     private DraftingRoomRepository draftingRoomRepository;
     @Autowired
@@ -42,14 +44,22 @@ public class DraftService {
 
     private void createDraftBoard(LeagueEntity leagueEntity) {
         try {
-            List<HashtagRankingEntity> hashtagRankingEntities = hashtagRankingService.getAll();
+            List<HashtagRankingZscoreEntity> hashtagRankingZscoreEntities = hashtagRankingZscoreService.getAll();
 
             List<DraftingRoomEntity> draftingRoomEntities = new ArrayList<>();
-            for (HashtagRankingEntity hashtagRankingEntity : hashtagRankingEntities) {
-                DraftingRoomEntity newDraftingRoomEntity = modelMapper.map(hashtagRankingEntity, DraftingRoomEntity.class);
+            for (HashtagRankingZscoreEntity zscoreEntity : hashtagRankingZscoreEntities) {
+                DraftingRoomEntity newDraftingRoomEntity = modelMapper.map(zscoreEntity, DraftingRoomEntity.class);
                 newDraftingRoomEntity.setLeague(leagueEntity.getId());
 
-                EspnRankingEntity espnRankingEntity = espnRankingService.findByName(hashtagRankingEntity.getName());
+                HashtagRankingStatsEntity statsEntity = hashtagRankingStatsService.getPlayer(zscoreEntity.getName());
+                if (statsEntity != null) {
+                    newDraftingRoomEntity.setHashtagRank(statsEntity.getRank());
+                    newDraftingRoomEntity.setPos(statsEntity.getPos());
+                    newDraftingRoomEntity.setGp(statsEntity.getGp());
+                    newDraftingRoomEntity.setMpg(statsEntity.getMpg());
+                }
+
+                EspnRankingEntity espnRankingEntity = espnRankingService.findByName(zscoreEntity.getName());
                 if (espnRankingEntity != null) {
                     newDraftingRoomEntity.setEspnAdp(espnRankingEntity.getAdp());
                     newDraftingRoomEntity.setEspnRank(espnRankingEntity.getRank());
@@ -77,7 +87,7 @@ public class DraftService {
             logger.info("Cleaned database of old draft data");
 
             return true;
-          
+
         } catch (Exception e) {
 
             logger.error("Encountered exception={}", e.getMessage());
