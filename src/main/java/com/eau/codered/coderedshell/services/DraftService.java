@@ -11,9 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,13 +40,32 @@ public class DraftService {
     private static Logger logger = LoggerFactory.getLogger(DraftService.class);
 
     public void setupDraft() {
-        cleanDraft(draftState.getLeagueEntity());
+        LeagueEntity leagueEntity = draftState.getLeagueEntity();
 
-        createDraftBoard();
+        cleanDraft(leagueEntity);
+        createDraftBoard(leagueEntity);
+        setDraftOrder(leagueEntity);
+
+        draftState.setDrafting(true);
+        draftState.setBoardLength(2 * leagueEntity.getNumTeams());
     }
 
-    private void createDraftBoard() {
-        LeagueEntity leagueEntity = draftState.getLeagueEntity();
+    private void setDraftOrder(LeagueEntity leagueEntity) {
+        Queue<Integer> draftOrder = new LinkedList<Integer>();
+        List<Integer> integerList = new ArrayList<>();
+        for (int i = 1; i <= leagueEntity.getNumTeams(); i++) {
+            integerList.add(i);
+        }
+
+        // TODO: replace 13 with num of rounds
+        for (int i = 0; i < 13; i++) {
+            draftOrder.addAll(integerList);
+            Collections.reverse(integerList);
+        }
+        draftState.setDraftOrder(draftOrder);
+    }
+
+    private void createDraftBoard(LeagueEntity leagueEntity) {
         try {
             List<HashtagRankingZscoreEntity> hashtagRankingZscoreEntities = hashtagRankingZscoreService.getAll();
 
@@ -123,35 +140,26 @@ public class DraftService {
 
     public DraftedPlayerEntity draftPlayer(DraftingRoomEntity selectedPlayer) {
         LeagueEntity leagueEntity = draftState.getLeagueEntity();
+        Integer teamNum = draftState.getDraftOrder().peek();
+        if (teamNum == null) {
+            return null;
+        }
 
         DraftedPlayerEntity newPlayer = modelMapper.map(selectedPlayer, DraftedPlayerEntity.class);
         newPlayer.setDraftedLeague(draftState.getLeagueEntity().getId());
         newPlayer.setDraftedPos(draftState.getDraftNum());
 
-        TeamEntity teamEntity = teamService.getTeamByDraftOrder(leagueEntity, draftState.getDraftPos());
+        TeamEntity teamEntity = teamService.getTeamByDraftOrder(leagueEntity, teamNum);
         newPlayer.setDraftedTeam(teamEntity.getId());
         newPlayer.setDraftedTeamName(teamEntity.getName());
 
         draftedPlayerRepository.save(newPlayer);
         draftingRoomRepository.delete(selectedPlayer);
 
-        if (draftState.isDraftForward()) {
-            if (draftState.getDraftPos() >= leagueEntity.getNumTeams()) {
-                draftState.setDraftPos(leagueEntity.getNumTeams());
-                draftState.setDraftForward(false);
-            } else {
-                draftState.setDraftPos(draftState.getDraftNum() + 1);
-            }
-        } else {
-            if (draftState.getDraftPos() <= 1) {
-                draftState.setDraftPos(1);
-                draftState.setDraftForward(true);
-            } else {
-                draftState.setDraftPos(draftState.getDraftNum() - 1);
-            }
-        }
         draftState.setDraftNum(draftState.getDraftNum() + 1);
+        draftState.getDraftOrder().remove();
 
         return newPlayer;
+
     }
 }

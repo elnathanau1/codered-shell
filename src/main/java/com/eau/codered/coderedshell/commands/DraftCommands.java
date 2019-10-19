@@ -17,10 +17,7 @@ import org.springframework.shell.table.BorderStyle;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 @ShellComponent
 public class DraftCommands {
@@ -59,10 +56,6 @@ public class DraftCommands {
             draftState.setLeagueEntity(leagueEntity);
             draftService.setupDraft();
 
-            draftState.setDrafting(true);
-            draftState.setBoardLength(2 * leagueEntity.getNumTeams());
-            draftState.setDraftNum(1);
-            draftState.setDraftForward(true);
 
             return "Draft set up!";
         }
