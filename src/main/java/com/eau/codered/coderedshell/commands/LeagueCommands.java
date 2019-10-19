@@ -41,6 +41,7 @@ public class LeagueCommands {
             TeamEntity teamEntity = TeamEntity.builder()
                     .leagueId(leagueEntity.getId())
                     .name("Team " + i)
+                    .draftOrder(i + 1)
                     .build();
             teamService.addTeam(teamEntity);
         }
@@ -78,11 +79,36 @@ public class LeagueCommands {
 
         LeagueEntity leagueEntity = leagueService.getLeagueByName(name);
 
-        if (!teamService.deleteTeamsInLeague(leagueEntity) || !draftService.cleanDraft(leagueEntity)|| !leagueService.deleteLeague(name)) {
+        if (!teamService.deleteTeamsInLeague(leagueEntity) || !draftService.cleanDraft(leagueEntity) || !leagueService.deleteLeague(name)) {
             return "Failed to delete league";
         }
 
         return "Successfully deleted league.";
+    }
 
+    @ShellMethod(value = "Set team names", key = {"name-teams"})
+    public String nameTeams(@ShellOption(value = {"-l", "--league"}, defaultValue = "no league") String leagueName) {
+        LeagueEntity leagueEntity = null;
+        if (leagueName.equals("no league")) {
+            leagueEntity = draftState.getLeagueEntity();
+        } else {
+            leagueEntity = leagueService.getLeagueByName(leagueName);
+        }
+
+        if (leagueEntity == null) {
+            return "Invalid league";
+        }
+
+        Scanner scanner = new Scanner(System.in);
+        List<TeamEntity> teams = teamService.getTeamsByLeagueId(leagueEntity);
+        for (TeamEntity teamEntity : teams) {
+            System.out.println(teamEntity.getName() + " - leave empty to keep name the same");
+            String newName = scanner.nextLine();
+            if (!newName.equals("")) {
+                teamEntity.setName(newName);
+            }
+        }
+        teamService.saveTeams(teams);
+        return "Team names changed!";
     }
 }

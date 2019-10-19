@@ -1,5 +1,6 @@
 package com.eau.codered.coderedshell.config;
 
+import com.eau.codered.coderedshell.entities.DraftedPlayerEntity;
 import com.eau.codered.coderedshell.entities.DraftingRoomEntity;
 import com.eau.codered.coderedshell.entities.HashtagRankingStatsEntity;
 import com.eau.codered.coderedshell.entities.HashtagRankingZscoreEntity;
@@ -36,6 +37,15 @@ public class ModelMapperConfig {
                     mapper.skip(DraftingRoomEntity::setGp);
                     mapper.skip(DraftingRoomEntity::setMpg);
                     mapper.skip(DraftingRoomEntity::setLastModified);
+                });
+
+        modelMapper.typeMap(DraftingRoomEntity.class, DraftedPlayerEntity.class)
+                .addMappings(mapper -> {
+                    mapper.skip(DraftedPlayerEntity::setDraftedPos);
+                    mapper.skip(DraftedPlayerEntity::setDraftedLeague);
+                    mapper.skip(DraftedPlayerEntity::setDraftedTeam);
+                    mapper.skip(DraftedPlayerEntity::setDraftedTeamName);
+                    mapper.map(DraftingRoomEntity::getHashtagRank, DraftedPlayerEntity::setRank);
                 });
 
         return modelMapper;

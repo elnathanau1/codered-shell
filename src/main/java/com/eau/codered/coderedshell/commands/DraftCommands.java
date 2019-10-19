@@ -1,6 +1,7 @@
 package com.eau.codered.coderedshell.commands;
 
 import com.eau.codered.coderedshell.config.DraftState;
+import com.eau.codered.coderedshell.entities.DraftedPlayerEntity;
 import com.eau.codered.coderedshell.entities.DraftingRoomEntity;
 import com.eau.codered.coderedshell.entities.LeagueEntity;
 import com.eau.codered.coderedshell.services.DraftService;
@@ -16,10 +17,7 @@ import org.springframework.shell.table.BorderStyle;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 @ShellComponent
 public class DraftCommands {
@@ -58,8 +56,6 @@ public class DraftCommands {
             draftState.setLeagueEntity(leagueEntity);
             draftService.setupDraft();
 
-            draftState.setDrafting(true);
-            draftState.setBoardLength(2 * leagueEntity.getNumTeams());
 
             return "Draft set up!";
         }
@@ -150,5 +146,17 @@ public class DraftCommands {
             return "Now sorting by " + category + "\n" + draftBoard();
         }
         return "Available categories: " + DraftUtil.getValidCategories().toString();
+    }
+
+    @ShellMethod(value = "Draft player", key = {"draft"})
+    public String draft(@ShellOption(value = {"-p", "--player"}) String playerName) {
+        DraftingRoomEntity selectedPlayer = draftService.getDraftPlayerByName(draftState.getLeagueEntity().getId(), playerName);
+        if (selectedPlayer == null) {
+            return "Could not find player";
+        }
+
+        DraftedPlayerEntity newPlayer = draftService.draftPlayer(selectedPlayer);
+
+        return newPlayer.getDraftedTeamName() + " drafted " + newPlayer.getName() + " with pick " + newPlayer.getDraftedPos();
     }
 }

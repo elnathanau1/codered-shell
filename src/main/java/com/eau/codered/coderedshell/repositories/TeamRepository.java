@@ -9,4 +9,8 @@ import java.util.List;
 @Repository
 public interface TeamRepository extends CrudRepository<TeamEntity, Integer> {
     List<TeamEntity> findAllByLeagueId(int leagueId);
+
+    List<TeamEntity> findAllByLeagueIdOrderByDraftOrder(int leagueId);
+
+    TeamEntity findByLeagueIdAndDraftOrder(int id, int draftOrder);
 }

@@ -26,4 +26,6 @@ public class TeamEntity {
     private String name;
 
     private int leagueId;
+
+    private int draftOrder;
 }

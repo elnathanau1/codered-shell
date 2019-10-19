@@ -5,7 +5,9 @@ import lombok.Data;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 
 @Data
 @Service
@@ -26,4 +28,6 @@ public class DraftState {
     }};
     private int boardLength = 24;
     private String sortCategory = "total";
+    private int draftNum = 1;
+    private Queue<Integer> draftOrder = new LinkedList<>();
 }
