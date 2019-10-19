@@ -31,4 +31,15 @@ public class TeamService {
             return false;
         }
     }
+
+    public List<TeamEntity> getTeamsByLeagueId(LeagueEntity leagueEntity) {
+        return teamRepository.findAllByLeagueIdOrderByDraftOrder(leagueEntity.getId());
+    }
+
+    public TeamEntity getTeamByDraftOrder(LeagueEntity leagueEntity, int draftOrder) {
+        return teamRepository.findByLeagueIdAndDraftOrder(leagueEntity.getId(), draftOrder);
+    }
+    public void saveTeams(List<TeamEntity> teams) {
+        teamRepository.saveAll(teams);
+    }
 }

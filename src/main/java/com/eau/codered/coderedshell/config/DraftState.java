@@ -1,10 +1,13 @@
 package com.eau.codered.coderedshell.config;
 
 import com.eau.codered.coderedshell.entities.LeagueEntity;
+import com.eau.codered.coderedshell.entities.TeamEntity;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -26,4 +29,7 @@ public class DraftState {
     }};
     private int boardLength = 24;
     private String sortCategory = "total";
+    private int draftNum = 1;
+    private int draftPos = 1;
+    private boolean draftForward = true;
 }

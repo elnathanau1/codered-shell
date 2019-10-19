@@ -33,6 +33,8 @@ public class DraftService {
 
     @Autowired
     private LeagueService leagueService;
+    @Autowired
+    private TeamService teamService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -113,5 +115,43 @@ public class DraftService {
         draftingRoomEntities = DraftUtil.sortList(draftingRoomEntities, category);
 
         return draftingRoomEntities;
+    }
+
+    public DraftingRoomEntity getDraftPlayerByName(int leagueId, String playerName) {
+        return draftingRoomRepository.findByLeagueAndNameAllIgnoreCase(leagueId, playerName);
+    }
+
+    public DraftedPlayerEntity draftPlayer(DraftingRoomEntity selectedPlayer) {
+        LeagueEntity leagueEntity = draftState.getLeagueEntity();
+
+        DraftedPlayerEntity newPlayer = modelMapper.map(selectedPlayer, DraftedPlayerEntity.class);
+        newPlayer.setDraftedLeague(draftState.getLeagueEntity().getId());
+        newPlayer.setDraftedPos(draftState.getDraftNum());
+
+        TeamEntity teamEntity = teamService.getTeamByDraftOrder(leagueEntity, draftState.getDraftPos());
+        newPlayer.setDraftedTeam(teamEntity.getId());
+        newPlayer.setDraftedTeamName(teamEntity.getName());
+
+        draftedPlayerRepository.save(newPlayer);
+        draftingRoomRepository.delete(selectedPlayer);
+
+        if (draftState.isDraftForward()) {
+            if (draftState.getDraftPos() >= leagueEntity.getNumTeams()) {
+                draftState.setDraftPos(leagueEntity.getNumTeams());
+                draftState.setDraftForward(false);
+            } else {
+                draftState.setDraftPos(draftState.getDraftNum() + 1);
+            }
+        } else {
+            if (draftState.getDraftPos() <= 1) {
+                draftState.setDraftPos(1);
+                draftState.setDraftForward(true);
+            } else {
+                draftState.setDraftPos(draftState.getDraftNum() - 1);
+            }
+        }
+        draftState.setDraftNum(draftState.getDraftNum() + 1);
+
+        return newPlayer;
     }
 }

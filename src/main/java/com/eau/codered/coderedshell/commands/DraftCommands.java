@@ -1,6 +1,7 @@
 package com.eau.codered.coderedshell.commands;
 
 import com.eau.codered.coderedshell.config.DraftState;
+import com.eau.codered.coderedshell.entities.DraftedPlayerEntity;
 import com.eau.codered.coderedshell.entities.DraftingRoomEntity;
 import com.eau.codered.coderedshell.entities.LeagueEntity;
 import com.eau.codered.coderedshell.services.DraftService;
@@ -60,6 +61,8 @@ public class DraftCommands {
 
             draftState.setDrafting(true);
             draftState.setBoardLength(2 * leagueEntity.getNumTeams());
+            draftState.setDraftNum(1);
+            draftState.setDraftForward(true);
 
             return "Draft set up!";
         }
@@ -150,5 +153,17 @@ public class DraftCommands {
             return "Now sorting by " + category + "\n" + draftBoard();
         }
         return "Available categories: " + DraftUtil.getValidCategories().toString();
+    }
+
+    @ShellMethod(value = "Draft player", key = {"draft"})
+    public String draft(@ShellOption(value = {"-p", "--player"}) String playerName) {
+        DraftingRoomEntity selectedPlayer = draftService.getDraftPlayerByName(draftState.getLeagueEntity().getId(), playerName);
+        if (selectedPlayer == null) {
+            return "Could not find player";
+        }
+
+        DraftedPlayerEntity newPlayer = draftService.draftPlayer(selectedPlayer);
+
+        return newPlayer.getDraftedTeamName() + " drafted " + newPlayer.getName() + " with pick " + newPlayer.getDraftedPos();
     }
 }
