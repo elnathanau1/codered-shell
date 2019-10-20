@@ -4,10 +4,7 @@ import com.eau.codered.coderedshell.entities.LeagueEntity;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 @Data
 @Service
@@ -30,4 +27,5 @@ public class DraftState {
     private String sortCategory = "total";
     private int draftNum = 1;
     private Queue<Integer> draftOrder = new LinkedList<>();
+    private List<String> playerNames = new ArrayList<>();
 }

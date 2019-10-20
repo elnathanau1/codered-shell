@@ -4,6 +4,10 @@ import com.eau.codered.coderedshell.config.DraftState;
 import com.eau.codered.coderedshell.entities.DraftedPlayerEntity;
 import com.eau.codered.coderedshell.entities.DraftingRoomEntity;
 import com.eau.codered.coderedshell.entities.LeagueEntity;
+import com.eau.codered.coderedshell.providers.LeagueValueProvider;
+import com.eau.codered.coderedshell.providers.PlayerValueProvider;
+import com.eau.codered.coderedshell.providers.SortValueProvider;
+import com.eau.codered.coderedshell.providers.WeightsValueProvider;
 import com.eau.codered.coderedshell.services.DraftService;
 import com.eau.codered.coderedshell.services.LeagueService;
 import com.eau.codered.coderedshell.util.DraftUtil;
@@ -17,7 +21,10 @@ import org.springframework.shell.table.BorderStyle;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 @ShellComponent
 public class DraftCommands {
@@ -39,7 +46,7 @@ public class DraftCommands {
     };
 
     @ShellMethod(value = "Start a draft for a league", key = "start-draft")
-    public String startDraft(@ShellOption(value = {"-l", "--league"}) String league) {
+    public String startDraft(@ShellOption(valueProvider = LeagueValueProvider.class) String league) {
         // confirm with user
         Scanner scanner = new Scanner(System.in);
         System.out.println("This will delete any existing draft data. Continue? (y/n)");
@@ -117,7 +124,7 @@ public class DraftCommands {
     }
 
     @ShellMethod(value = "Set the weights for total calculations", key = {"weights"})
-    public String setWeights(@ShellOption(value = {"-c", "--cat", "--category"}, defaultValue = "none") String category,
+    public String setWeights(@ShellOption(value = {"-c", "--category"}, defaultValue = "none", valueProvider = WeightsValueProvider.class) String category,
                              @ShellOption(value = {"-v", "--value"}, defaultValue = "1.0") Double value) {
         if (category.equals("none")) {
             return draftState.getWeights().toString();
@@ -140,7 +147,7 @@ public class DraftCommands {
     }
 
     @ShellMethod(value = "Set the sort category", key = {"sort"})
-    public String setSort(@ShellOption(value = {"-c", "--cat", "--category"}) String category) {
+    public String setSort(@ShellOption(value = {"-c", "--category"}, valueProvider = SortValueProvider.class) String category) {
         if (DraftUtil.getValidCategories().contains(category.toLowerCase())) {
             draftState.setSortCategory(category);
             return "Now sorting by " + category + "\n" + draftBoard();
@@ -149,14 +156,14 @@ public class DraftCommands {
     }
 
     @ShellMethod(value = "Draft player", key = {"draft"})
-    public String draft(@ShellOption(value = {"-p", "--player"}) String playerName) {
+    public String draft(@ShellOption(valueProvider = PlayerValueProvider.class) String playerName) {
         DraftingRoomEntity selectedPlayer = draftService.getDraftPlayerByName(draftState.getLeagueEntity().getId(), playerName);
         if (selectedPlayer == null) {
             return "Could not find player";
         }
 
         DraftedPlayerEntity newPlayer = draftService.draftPlayer(selectedPlayer);
-
+        
         return newPlayer.getDraftedTeamName() + " drafted " + newPlayer.getName() + " with pick " + newPlayer.getDraftedPos();
     }
 }
