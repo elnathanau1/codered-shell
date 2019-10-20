@@ -2,10 +2,6 @@ package com.eau.codered.coderedshell.util;
 
 import com.eau.codered.coderedshell.entities.DraftingRoomEntity;
 import lombok.Getter;
-import org.springframework.shell.table.ArrayTableModel;
-import org.springframework.shell.table.BorderStyle;
-import org.springframework.shell.table.TableBuilder;
-import org.springframework.shell.table.TableModel;
 
 import java.util.*;
 import java.util.function.Function;
@@ -125,17 +121,7 @@ public class DraftUtil {
             });
         }
 
-        String[][] array = new String[model.size()][model.get(0).length];
-        for (int i = 0; i < model.size(); i++) {
-            array[i] = model.get(i);
-        }
-
-        TableModel tableModel = new ArrayTableModel(array);
-        TableBuilder tableBuilder = new TableBuilder(tableModel);
-        tableBuilder.addFullBorder(BorderStyle.fancy_light);
-        String table = tableBuilder.build().render(150);
-
-        return table;
+        return StringUtil.listToTable(model);
 
     }
 }

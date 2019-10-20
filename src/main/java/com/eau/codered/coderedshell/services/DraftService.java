@@ -5,6 +5,7 @@ import com.eau.codered.coderedshell.entities.*;
 import com.eau.codered.coderedshell.repositories.DraftedPlayerRepository;
 import com.eau.codered.coderedshell.repositories.DraftingRoomRepository;
 import com.eau.codered.coderedshell.util.DraftUtil;
+import com.eau.codered.coderedshell.util.StringUtil;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,6 +155,7 @@ public class DraftService {
         }
 
         DraftedPlayerEntity newPlayer = modelMapper.map(selectedPlayer, DraftedPlayerEntity.class);
+        newPlayer.setTotal(DraftUtil.setTotal(selectedPlayer, draftState.getWeights()).getTotal());
         newPlayer.setDraftedLeague(draftState.getLeagueEntity().getId());
         newPlayer.setDraftedPos(draftState.getDraftNum());
 
@@ -183,8 +185,8 @@ public class DraftService {
             stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getFtPercent).sum());
             stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getThreepm).sum());
             stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getPts).sum());
-            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getAst).sum());
             stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getTreb).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getAst).sum());
             stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getStl).sum());
             stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getBlk).sum());
             stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getTurnovers).sum());
@@ -216,5 +218,59 @@ public class DraftService {
         draftState.getDraftLog().add(teamEntity.getName() + " passed their draft pick at #" + draftState.getDraftNum());
         draftState.setDraftNum(draftState.getDraftNum() + 1);
         draftState.getDraftOrder().remove();
+    }
+
+    public String getTeamRank(LeagueEntity leagueEntity) {
+        Map<TeamEntity, List<DraftedPlayerEntity>> teamPlayers = getAllDraftedTeams(leagueEntity);
+
+        Map<TeamEntity, List<Double>> teamStats = new HashMap<>();
+        for (TeamEntity teamEntity : teamPlayers.keySet()) {
+            List<Double> stats = new ArrayList<>();
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getFgPercent).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getFtPercent).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getThreepm).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getPts).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getTreb).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getAst).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getStl).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getBlk).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getTurnovers).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getTotal).sum());
+
+            teamStats.put(teamEntity, stats);
+        }
+        List<TeamEntity> teams = teamService.getTeamsByLeagueId(leagueEntity);
+        List<String> teamNames = teams.stream().map(TeamEntity::getName).collect(Collectors.toList());
+        List<String> header = new ArrayList<>(Arrays.asList(""));
+        header.addAll(teamNames);
+
+        String[] headerArray = new String[draftState.getLeagueEntity().getNumTeams() + 1];
+        header.toArray(headerArray);
+
+        List<String[]> model = new ArrayList<>();
+        model.add(headerArray);
+        List<String> categories = new ArrayList<>(DraftUtil.getStatCategories());
+        categories.add("total");
+
+        for (int i = 0; i < categories.size(); i++) {
+            int finalI = i;     // for some reason, this is needed.
+            List<TeamEntity> unorderedTeams = new ArrayList<>(teams);
+            List<TeamEntity> orderedTeams = new ArrayList<>(teams);
+            orderedTeams.sort(Comparator.comparing(x -> teamStats.get(x).get(finalI)).reversed());
+            List<String> teamOrder = unorderedTeams
+                    .stream()
+                    .map(x -> orderedTeams.indexOf(x) + 1)
+                    .map(String::valueOf)
+                    .collect(Collectors.toList());
+
+            List<String> toAdd = new ArrayList<>();
+            toAdd.add(categories.get(finalI));
+            toAdd.addAll(teamOrder);
+            String[] newEntry = new String[draftState.getLeagueEntity().getNumTeams() + 1];
+            toAdd.toArray(newEntry);
+            model.add(newEntry);
+        }
+
+        return StringUtil.listToTable(model);
     }
 }

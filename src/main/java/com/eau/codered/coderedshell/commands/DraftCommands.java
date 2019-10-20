@@ -200,14 +200,7 @@ public class DraftCommands {
             });
         }
 
-        String[][] array = new String[model.size()][model.get(0).length];
-        for (int i = 0; i < model.size(); i++) {
-            array[i] = model.get(i);
-        }
-        TableModel tableModel = new ArrayTableModel(array);
-        TableBuilder tableBuilder = new TableBuilder(tableModel);
-        tableBuilder.addFullBorder(BorderStyle.fancy_light);
-        String table = tableBuilder.build().render(150);
+        String table = StringUtil.listToTable(model);
 
         utilCommands.clear();
         return table;
@@ -228,5 +221,10 @@ public class DraftCommands {
             stringBuilder.append(entry).append("\n");
         }
         return stringBuilder.toString();
+    }
+
+    @ShellMethod(value = "Display team rank", key = "rank")
+    public String rank() {
+        return draftService.getTeamRank(draftState.getLeagueEntity());
     }
 }

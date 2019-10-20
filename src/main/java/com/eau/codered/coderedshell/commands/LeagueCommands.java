@@ -12,8 +12,10 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 @ShellComponent
 public class LeagueCommands {
@@ -111,5 +113,22 @@ public class LeagueCommands {
         }
         teamService.saveTeams(teams);
         return "Team names changed!";
+    }
+
+    @ShellMethod(value = "test method", key = "test")
+    public String test() {
+        List<TeamEntity> orderedTeams = new ArrayList<>();
+        orderedTeams.add(TeamEntity.builder().name("B").build());
+        orderedTeams.add(TeamEntity.builder().name("C").build());
+        orderedTeams.add(TeamEntity.builder().name("A").build());
+        orderedTeams.add(TeamEntity.builder().name("D").build());
+        orderedTeams.add(TeamEntity.builder().name("E").build());
+        List<String> teamOrder = orderedTeams
+                .stream()
+                .map(x -> orderedTeams.indexOf(x) + 1)
+                .map(String::valueOf)
+                .collect(Collectors.toList());
+
+        return teamOrder.toString();
     }
 }
