@@ -165,6 +165,7 @@ public class DraftService {
         draftingRoomRepository.delete(selectedPlayer);
         draftState.getPlayerNames().remove(selectedPlayer.getName());
 
+        draftState.getDraftLog().add(teamEntity.getName() + " drafted " + newPlayer.getName() + " with pick #" + draftState.getDraftNum());
         draftState.setDraftNum(draftState.getDraftNum() + 1);
         draftState.getDraftOrder().remove();
 
@@ -210,7 +211,9 @@ public class DraftService {
         return draftedPlayerRepository.findAllByDraftedTeam(teamEntity.getId());
     }
 
-    public void draftPass() {
+    public void draftPass(LeagueEntity leagueEntity) {
+        TeamEntity teamEntity = teamService.getTeamByDraftOrder(leagueEntity, draftState.getDraftOrder().peek());
+        draftState.getDraftLog().add(teamEntity.getName() + " passed their draft pick at #" + draftState.getDraftNum());
         draftState.setDraftNum(draftState.getDraftNum() + 1);
         draftState.getDraftOrder().remove();
     }

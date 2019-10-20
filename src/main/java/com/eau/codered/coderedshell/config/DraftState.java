@@ -28,4 +28,5 @@ public class DraftState {
     private int draftNum = 1;
     private Queue<Integer> draftOrder = new LinkedList<>();
     private List<String> playerNames = new ArrayList<>();
+    private List<String> draftLog = new ArrayList();
 }

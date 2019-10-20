@@ -164,7 +164,7 @@ public class DraftCommands {
     @ShellMethod(value = "Draft player", key = {"draft"})
     public String draft(@ShellOption(valueProvider = PlayerValueProvider.class) String playerName) {
         if (playerName.toLowerCase().equals("pass")) {
-            draftService.draftPass();
+            draftService.draftPass(draftState.getLeagueEntity());
             return "Pick skipped";
 
         }
@@ -175,7 +175,7 @@ public class DraftCommands {
 
         DraftedPlayerEntity newPlayer = draftService.draftPlayer(selectedPlayer);
 
-        return teamStats() + "\n" + newPlayer.getDraftedTeamName() + " drafted " + newPlayer.getName() + " with pick " + newPlayer.getDraftedPos();
+        return dB() + "\n" + newPlayer.getDraftedTeamName() + " drafted " + newPlayer.getName() + " with pick " + newPlayer.getDraftedPos();
     }
 
     @ShellMethod(value = "Display team stats", key = {"team-stats"})
@@ -216,8 +216,17 @@ public class DraftCommands {
     @ShellMethod(value = "Display positional scarcity", key = "pos")
     public String positionalScarcity() {
         List<DraftingRoomEntity> draftingRoomEntities = draftService.getDraftBoard(draftState.getSortCategory());
-        
+
         utilCommands.clear();
         return DraftUtil.getPositionalScarcity(draftingRoomEntities);
+    }
+
+    @ShellMethod(value = "Display draft log", key = "log")
+    public String log() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String entry : draftState.getDraftLog()) {
+            stringBuilder.append(entry).append("\n");
+        }
+        return stringBuilder.toString();
     }
 }
