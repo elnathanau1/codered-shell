@@ -1,5 +1,6 @@
 package com.eau.codered.coderedshell.config;
 
+import com.eau.codered.coderedshell.entities.DraftingRoomEntity;
 import com.eau.codered.coderedshell.entities.LeagueEntity;
 import lombok.Data;
 import org.springframework.stereotype.Service;
@@ -29,4 +30,7 @@ public class DraftState {
     private Queue<Integer> draftOrder = new LinkedList<>();
     private List<String> playerNames = new ArrayList<>();
     private List<String> draftLog = new ArrayList();
+    private Stack<DraftingRoomEntity> pastDraftingRoomEntities = new Stack<>();
+    private Stack<Integer> pastDraftOrder = new Stack<>();
+
 }

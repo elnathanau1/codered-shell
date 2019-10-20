@@ -166,6 +166,8 @@ public class DraftService {
         draftedPlayerRepository.save(newPlayer);
         draftingRoomRepository.delete(selectedPlayer);
         draftState.getPlayerNames().remove(selectedPlayer.getName());
+        draftState.getPastDraftingRoomEntities().push(selectedPlayer);
+        draftState.getPastDraftOrder().push(teamNum);
 
         draftState.getDraftLog().add(teamEntity.getName() + " drafted " + newPlayer.getName() + " with pick #" + draftState.getDraftNum());
         draftState.setDraftNum(draftState.getDraftNum() + 1);
@@ -174,6 +176,31 @@ public class DraftService {
         return newPlayer;
 
     }
+
+    public void undoDraft() {
+        DraftingRoomEntity lastPlayer = draftState.getPastDraftingRoomEntities().pop();
+        if (lastPlayer != null) {
+            draftingRoomRepository.save(lastPlayer);
+
+            DraftedPlayerEntity draftedPlayerEntity = draftedPlayerRepository.findByDraftedLeagueAndName(draftState.getLeagueEntity().getId(), lastPlayer.getName());
+            if (draftedPlayerEntity != null) {
+                draftedPlayerRepository.delete(draftedPlayerEntity);
+            }
+
+            draftState.getPlayerNames().add(lastPlayer.getName());
+        }
+
+        Queue<Integer> newDraftOrder = new LinkedList<>();
+        newDraftOrder.add(draftState.getPastDraftOrder().pop());
+        newDraftOrder.addAll(draftState.getDraftOrder());
+        draftState.setDraftOrder(newDraftOrder);
+
+        draftState.setDraftNum(draftState.getDraftNum() - 1);
+
+        System.out.println("Undo pick " + draftState.getDraftNum());
+
+    }
+
     public Map<TeamEntity, List<String>> getTeamStats(LeagueEntity leagueEntity) {
         DecimalFormat df = new DecimalFormat("#.###");
         Map<TeamEntity, List<DraftedPlayerEntity>> teamPlayers = getAllDraftedTeams(leagueEntity);
@@ -217,7 +244,8 @@ public class DraftService {
         TeamEntity teamEntity = teamService.getTeamByDraftOrder(leagueEntity, draftState.getDraftOrder().peek());
         draftState.getDraftLog().add(teamEntity.getName() + " passed their draft pick at #" + draftState.getDraftNum());
         draftState.setDraftNum(draftState.getDraftNum() + 1);
-        draftState.getDraftOrder().remove();
+        draftState.getPastDraftOrder().push(draftState.getDraftOrder().poll());
+        draftState.getPastDraftingRoomEntities().push(null);
     }
 
     public String getTeamRank(LeagueEntity leagueEntity) {

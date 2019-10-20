@@ -227,4 +227,10 @@ public class DraftCommands {
     public String rank() {
         return draftService.getTeamRank(draftState.getLeagueEntity());
     }
+
+    @ShellMethod(value = "Undo draft pick", key = "undo")
+    public String undo() {
+        draftService.undoDraft();
+        return "Success";
+    }
 }

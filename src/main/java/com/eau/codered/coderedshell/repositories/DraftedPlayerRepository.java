@@ -11,4 +11,6 @@ public interface DraftedPlayerRepository extends CrudRepository<DraftedPlayerEnt
     List<DraftedPlayerEntity> findAllByDraftedLeague(int draftedLeague);
 
     List<DraftedPlayerEntity> findAllByDraftedTeam(int id);
+
+    DraftedPlayerEntity findByDraftedLeagueAndName(int id, String name);
 }
