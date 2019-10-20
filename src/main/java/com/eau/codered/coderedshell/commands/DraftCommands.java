@@ -82,6 +82,8 @@ public class DraftCommands {
             model.add(DRAFT_HEADERS);
 
             List<DraftingRoomEntity> draftingRoomEntities = draftService.getDraftBoard(draftState.getSortCategory());
+
+
             List<DraftingRoomEntity> displayedRoomEntities = draftingRoomEntities.subList(0, draftState.getBoardLength());
 
             for (DraftingRoomEntity draftingRoomEntity : displayedRoomEntities) {
@@ -209,5 +211,13 @@ public class DraftCommands {
 
         utilCommands.clear();
         return table;
+    }
+
+    @ShellMethod(value = "Display positional scarcity", key = "pos")
+    public String positionalScarcity() {
+        List<DraftingRoomEntity> draftingRoomEntities = draftService.getDraftBoard(draftState.getSortCategory());
+        
+        utilCommands.clear();
+        return DraftUtil.getPositionalScarcity(draftingRoomEntities);
     }
 }
