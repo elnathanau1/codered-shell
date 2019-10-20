@@ -4,6 +4,7 @@ import com.eau.codered.coderedshell.config.DraftState;
 import com.eau.codered.coderedshell.entities.DraftedPlayerEntity;
 import com.eau.codered.coderedshell.entities.DraftingRoomEntity;
 import com.eau.codered.coderedshell.entities.LeagueEntity;
+import com.eau.codered.coderedshell.entities.TeamEntity;
 import com.eau.codered.coderedshell.providers.LeagueValueProvider;
 import com.eau.codered.coderedshell.providers.PlayerValueProvider;
 import com.eau.codered.coderedshell.providers.SortValueProvider;
@@ -45,6 +46,10 @@ public class DraftCommands {
             "htag_rk", "espn_rk", "espn_adp", "name", "pos", "gp ", "fg_pct", "ft_pct", "3pm  ", "pts  ", "reb  ", "ast  ", "stl  ", "blk  ", "to   ", "total"
     };
 
+    private static final String[] STAT_HEADERS = new String[]{
+            "team_id", "team_name", "fg_pct", "ft_pct", "3pm  ", "pts  ", "reb  ", "ast  ", "stl  ", "blk  ", "to   "
+    };
+
     @ShellMethod(value = "Start a draft for a league", key = "start-draft")
     public String startDraft(@ShellOption(valueProvider = LeagueValueProvider.class) String league) {
         // confirm with user
@@ -63,14 +68,13 @@ public class DraftCommands {
             draftState.setLeagueEntity(leagueEntity);
             draftService.setupDraft();
 
-
             return "Draft set up!";
         }
         return "Enter a valid league";
     }
 
-    @ShellMethod(value = "Display the draft board", key = {"draft-board", "db"})
-    public String draftBoard() {
+    @ShellMethod(value = "Display the draft board", key = {"db"})
+    public String dB() {
         List<String> possibleSort = new ArrayList<>();
         if (draftState.isDrafting()) {
             // display table
@@ -150,20 +154,60 @@ public class DraftCommands {
     public String setSort(@ShellOption(value = {"-c", "--category"}, valueProvider = SortValueProvider.class) String category) {
         if (DraftUtil.getValidCategories().contains(category.toLowerCase())) {
             draftState.setSortCategory(category);
-            return "Now sorting by " + category + "\n" + draftBoard();
+            return "Now sorting by " + category + "\n" + dB();
         }
         return "Available categories: " + DraftUtil.getValidCategories().toString();
     }
 
     @ShellMethod(value = "Draft player", key = {"draft"})
     public String draft(@ShellOption(valueProvider = PlayerValueProvider.class) String playerName) {
+        if (playerName.toLowerCase().equals("pass")) {
+            draftService.draftPass();
+            return "Pick skipped";
+
+        }
         DraftingRoomEntity selectedPlayer = draftService.getDraftPlayerByName(draftState.getLeagueEntity().getId(), playerName);
         if (selectedPlayer == null) {
             return "Could not find player";
         }
 
         DraftedPlayerEntity newPlayer = draftService.draftPlayer(selectedPlayer);
-        
-        return newPlayer.getDraftedTeamName() + " drafted " + newPlayer.getName() + " with pick " + newPlayer.getDraftedPos();
+
+        return teamStats() + "\n" + newPlayer.getDraftedTeamName() + " drafted " + newPlayer.getName() + " with pick " + newPlayer.getDraftedPos();
+    }
+
+    @ShellMethod(value = "Display team stats", key = {"team-stats"})
+    public String teamStats() {
+        Map<TeamEntity, List<String>> teamStats = draftService.getTeamStats(draftState.getLeagueEntity());
+
+        List<String[]> model = new ArrayList<>();
+        model.add(STAT_HEADERS);
+        for (TeamEntity teamEntity : teamStats.keySet()) {
+            model.add(new String[]{
+                    String.valueOf(teamEntity.getId()),
+                    teamEntity.getName(),
+                    teamStats.get(teamEntity).get(0),
+                    teamStats.get(teamEntity).get(1),
+                    teamStats.get(teamEntity).get(2),
+                    teamStats.get(teamEntity).get(3),
+                    teamStats.get(teamEntity).get(4),
+                    teamStats.get(teamEntity).get(5),
+                    teamStats.get(teamEntity).get(6),
+                    teamStats.get(teamEntity).get(7),
+                    teamStats.get(teamEntity).get(8)
+            });
+        }
+
+        String[][] array = new String[model.size()][model.get(0).length];
+        for (int i = 0; i < model.size(); i++) {
+            array[i] = model.get(i);
+        }
+        TableModel tableModel = new ArrayTableModel(array);
+        TableBuilder tableBuilder = new TableBuilder(tableModel);
+        tableBuilder.addFullBorder(BorderStyle.fancy_light);
+        String table = tableBuilder.build().render(150);
+
+        utilCommands.clear();
+        return table;
     }
 }
