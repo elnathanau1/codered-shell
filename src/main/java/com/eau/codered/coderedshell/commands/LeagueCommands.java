@@ -3,6 +3,7 @@ package com.eau.codered.coderedshell.commands;
 import com.eau.codered.coderedshell.config.DraftState;
 import com.eau.codered.coderedshell.entities.LeagueEntity;
 import com.eau.codered.coderedshell.entities.TeamEntity;
+import com.eau.codered.coderedshell.providers.LeagueValueProvider;
 import com.eau.codered.coderedshell.services.DraftService;
 import com.eau.codered.coderedshell.services.LeagueService;
 import com.eau.codered.coderedshell.services.TeamService;
@@ -67,7 +68,7 @@ public class LeagueCommands {
     }
 
     @ShellMethod(value = "Delete a league", key = "delete-league")
-    public String deleteLeague(@ShellOption(value = {"-n", "--name"}) String name) {
+    public String deleteLeague(@ShellOption(valueProvider = LeagueValueProvider.class) String name) {
         // confirm with user
         Scanner scanner = new Scanner(System.in);
         System.out.println("This will delete all info connected to the league. Continue? (y/n)");
@@ -87,7 +88,7 @@ public class LeagueCommands {
     }
 
     @ShellMethod(value = "Set team names", key = {"name-teams"})
-    public String nameTeams(@ShellOption(value = {"-l", "--league"}, defaultValue = "no league") String leagueName) {
+    public String nameTeams(@ShellOption(value = {"-l", "--league"}, defaultValue = "no league", valueProvider = LeagueValueProvider.class) String leagueName) {
         LeagueEntity leagueEntity = null;
         if (leagueName.equals("no league")) {
             leagueEntity = draftState.getLeagueEntity();

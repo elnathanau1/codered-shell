@@ -93,6 +93,13 @@ public class DraftService {
 
             draftingRoomRepository.saveAll(draftingRoomEntities);
 
+            List<String> playerNames = draftingRoomEntities
+                    .stream()
+                    .map(DraftingRoomEntity::getName)
+                    .collect(Collectors.toList());
+
+            draftState.setPlayerNames(playerNames);
+
             logger.info("Draft room is now set up");
         } catch (Exception e) {
             logger.error("Could not create draft board for league={}, exception e={}", leagueEntity, e.getMessage());
@@ -155,6 +162,7 @@ public class DraftService {
 
         draftedPlayerRepository.save(newPlayer);
         draftingRoomRepository.delete(selectedPlayer);
+        draftState.getPlayerNames().remove(selectedPlayer.getName());
 
         draftState.setDraftNum(draftState.getDraftNum() + 1);
         draftState.getDraftOrder().remove();
