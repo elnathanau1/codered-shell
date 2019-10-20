@@ -34,3 +34,5 @@ out/
 python/env
 env/
 spring-shell.log
+
+.DS_STORE
