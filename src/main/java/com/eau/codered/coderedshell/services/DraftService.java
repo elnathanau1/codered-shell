@@ -185,6 +185,8 @@ public class DraftService {
             DraftedPlayerEntity draftedPlayerEntity = draftedPlayerRepository.findByDraftedLeagueAndName(draftState.getLeagueEntity().getId(), lastPlayer.getName());
             if (draftedPlayerEntity != null) {
                 draftedPlayerRepository.delete(draftedPlayerEntity);
+                System.out.println("Undo - " + draftedPlayerEntity.getDraftedTeamName() + " drafted " + draftedPlayerEntity.getName() +
+                        " with pick #" + draftedPlayerEntity.getDraftedPos());
             }
 
             draftState.getPlayerNames().add(lastPlayer.getName());
@@ -197,8 +199,9 @@ public class DraftService {
 
         draftState.setDraftNum(draftState.getDraftNum() - 1);
 
-        System.out.println("Undo pick " + draftState.getDraftNum());
-
+        if (lastPlayer == null) {
+            System.out.println("Undo - pick skipped at pick #" + draftState.getDraftNum());
+        }
     }
 
     public Map<TeamEntity, List<String>> getTeamStats(LeagueEntity leagueEntity) {

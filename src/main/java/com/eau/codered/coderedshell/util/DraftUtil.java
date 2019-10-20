@@ -93,7 +93,12 @@ public class DraftUtil {
 
                 Integer newValue = (int) draftingRoomEntities
                         .stream()
-                        .filter(x -> Arrays.asList(x.getPos().toLowerCase().split(",")).contains(position))
+                        .filter(x -> {
+                            if (x.getPos() == null) {
+                                return false;
+                            }
+                            return Arrays.asList(x.getPos().toLowerCase().split(",")).contains(position);
+                        })
                         .filter(x -> x.getTotal() > lowerBound && x.getTotal() <= upperBound)
                         .count();
 

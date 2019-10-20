@@ -178,7 +178,7 @@ public class DraftCommands {
         return dB() + "\n" + newPlayer.getDraftedTeamName() + " drafted " + newPlayer.getName() + " with pick " + newPlayer.getDraftedPos();
     }
 
-    @ShellMethod(value = "Display team stats", key = {"team-stats"})
+    @ShellMethod(value = "Display team stats", key = {"stats"})
     public String teamStats() {
         Map<TeamEntity, List<String>> teamStats = draftService.getTeamStats(draftState.getLeagueEntity());
 
