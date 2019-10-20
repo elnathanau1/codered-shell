@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -169,5 +170,48 @@ public class DraftService {
 
         return newPlayer;
 
+    }
+    public Map<TeamEntity, List<String>> getTeamStats(LeagueEntity leagueEntity) {
+        DecimalFormat df = new DecimalFormat("#.###");
+        Map<TeamEntity, List<DraftedPlayerEntity>> teamPlayers = getAllDraftedTeams(leagueEntity);
+
+        Map<TeamEntity, List<String>> teamStats = new HashMap<>();
+        for (TeamEntity teamEntity : teamPlayers.keySet()) {
+            List<Double> stats = new ArrayList<>();
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getFgPercent).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getFtPercent).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getThreepm).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getPts).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getAst).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getTreb).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getStl).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getBlk).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getTurnovers).sum());
+            stats.add(teamPlayers.get(teamEntity).stream().mapToDouble(DraftedPlayerEntity::getTotal).sum());
+
+            List<String> formattedStats = stats.stream().map(df::format).collect(Collectors.toList());
+
+            teamStats.put(teamEntity, formattedStats);
+        }
+
+        return teamStats;
+    }
+
+    public Map<TeamEntity, List<DraftedPlayerEntity>> getAllDraftedTeams(LeagueEntity leagueEntity) {
+        List<TeamEntity> teams = teamService.getTeamsByLeagueId(leagueEntity);
+
+        Map<TeamEntity, List<DraftedPlayerEntity>> draftedTeams = teams.stream().collect(Collectors.toMap(team -> team, this::getDraftedTeam, (a, b) -> b));
+
+        return draftedTeams;
+
+    }
+
+    public List<DraftedPlayerEntity> getDraftedTeam(TeamEntity teamEntity) {
+        return draftedPlayerRepository.findAllByDraftedTeam(teamEntity.getId());
+    }
+
+    public void draftPass() {
+        draftState.setDraftNum(draftState.getDraftNum() + 1);
+        draftState.getDraftOrder().remove();
     }
 }
